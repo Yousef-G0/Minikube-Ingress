@@ -26,7 +26,7 @@ spec:
     - name: docker-sock
       mountPath: /var/run
   - name: kubectl
-    image: registry.k8s.io/kubectl:latest
+    image: registry.k8s.io/kubectl:v1.30.0
     command:
     - cat
     tty: true
