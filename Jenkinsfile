@@ -12,29 +12,28 @@ spec:
   containers:
   - name: maven
     image: maven:3.8-openjdk-17
-    command:
-    - cat
+    command: ['cat']
     tty: true
     volumeMounts:
     - name: maven-cache
       mountPath: /root/.m2
   - name: docker
-    image: docker:24-dind
-    securityContext:
-      privileged: true
+    image: docker:24-cli
+    command: ['cat']
+    tty: true
     volumeMounts:
     - name: docker-sock
-      mountPath: /var/run
+      mountPath: /var/run/docker.sock
   - name: kubectl
-    image: registry.k8s.io/kubectl:v1.30.0
-    command:
-    - cat
-    tty: true
+    image: bitnami/kubectl:1.30
+    command: ['sleep']
+    args: ['infinity']
   volumes:
   - name: maven-cache
     emptyDir: {}
   - name: docker-sock
-    emptyDir: {}
+    hostPath:
+      path: /var/run/docker.sock
 """
     }
   }
