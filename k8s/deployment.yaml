@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-java-app
+  labels:
+    app: simple-java-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: simple-java-app
+  template:
+    metadata:
+      labels:
+        app: simple-java-app
+    spec:
+      containers:
+      - name: simple-java-app
+        image: youseflol/simple-java-app:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: YOUR_NAME
+          value: "Yousef Feery"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 20
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
