@@ -25,11 +25,11 @@ spec:
     volumeMounts:
     - name: docker-sock
       mountPath: /var/run
-  - name: kubectl
-    image: bitnami/kubectl:1.28.2   
-    command:
-    - cat
-    tty: true
+ - name: kubectl
+  image: registry.k8s.io/kubectl:latest
+  command:
+  - cat
+     tty: true
   volumes:
   - name: maven-cache
     emptyDir: {}
@@ -68,15 +68,9 @@ spec:
             steps {
                 container('docker') {
                     sh '''
-                        # Wait for Docker daemon to be ready
                         timeout 60 sh -c 'until docker info; do sleep 1; done'
-                        
-                        echo "Building Docker image..."
                         docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} .
                         docker tag ${DOCKER_IMAGE}:${BUILD_NUMBER} ${DOCKER_IMAGE}:latest
-                        
-                        echo "Docker images built:"
-                        docker images | grep simple-java-app
                     '''
                 }
             }
@@ -86,14 +80,9 @@ spec:
             steps {
                 container('docker') {
                     sh '''
-                        echo "Logging in to Docker Hub..."
                         echo ${DOCKER_CREDENTIALS_PSW} | docker login -u ${DOCKER_CREDENTIALS_USR} --password-stdin
-                        
-                        echo "Pushing Docker images..."
                         docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
                         docker push ${DOCKER_IMAGE}:latest
-                        
-                        echo "Images pushed successfully!"
                     '''
                 }
             }
@@ -103,13 +92,8 @@ spec:
             steps {
                 container('kubectl') {
                     sh '''
-                        echo "Deploying to Kubernetes..."
                         kubectl apply -f k8s/
-                        
-                        echo "Waiting for deployment to be ready..."
                         kubectl rollout status deployment/simple-java-app --timeout=5m
-                        
-                        echo "Deployment complete!"
                         kubectl get pods -l app=simple-java-app
                         kubectl get svc simple-java-app-service
                         kubectl get ingress simple-java-app-ingress
@@ -118,6 +102,8 @@ spec:
             }
         }
     }
+}
+
     
     post {
         success {
