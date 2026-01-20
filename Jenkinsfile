@@ -26,8 +26,8 @@ spec:
       mountPath: /var/run/docker.sock
   - name: kubectl
     image: bitnami/kubectl:latest
-    command: ['sleep']
-    args: ['infinity']
+    command: ['cat']
+    tty: true
   volumes:
   - name: maven-cache
     emptyDir: {}
@@ -88,19 +88,16 @@ spec:
     stage('Deploy to Kubernetes') {
       steps {
         container('kubectl') {
-          script {
-            sh '''
-              kubectl apply -f k8s/
-              kubectl rollout status deployment/simple-java-app --timeout=5m
-              kubectl get pods -l app=simple-java-app
-              kubectl get svc simple-java-app-service
-              kubectl get ingress simple-java-app-ingress
-            '''
-          }
+          sh 'kubectl version --client'
+          sh 'kubectl apply -f k8s/'
+          sh 'kubectl rollout status deployment/simple-java-app --timeout=5m'
+          sh 'kubectl get pods -l app=simple-java-app'
+          sh 'kubectl get svc simple-java-app-service'
+          sh 'kubectl get ingress simple-java-app-ingress'
         }
       }
     }
-  }  
+  }
 
   post {
     success {
