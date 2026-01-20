@@ -86,17 +86,18 @@ spec:
     }
 
     stage('Deploy to Kubernetes') {
-      steps {
-        container('kubectl') {
-          sh '''
-            kubectl apply -f k8s/
-            kubectl rollout status deployment/simple-java-app --timeout=5m
-            kubectl get pods -l app=simple-java-app
-            kubectl get svc simple-java-app-service
-            kubectl get ingress simple-java-app-ingress
-          '''
+    steps {
+        container('kubectl') {  
+            script {
+                sh '''
+                    kubectl apply -f k8s/
+                    kubectl rollout status deployment/simple-java-app --timeout=5m
+                    kubectl get pods -l app=simple-java-app
+                    kubectl get svc simple-java-app-service
+                    kubectl get ingress simple-java-app-ingress
+                '''
+            }
         }
-      }
     }
   }
 
