@@ -1,6 +1,7 @@
 pipeline {
   agent {
     kubernetes {
+      defaultContainer 'maven'
       yaml """
 apiVersion: v1
 kind: Pod
@@ -17,6 +18,7 @@ spec:
     volumeMounts:
     - name: maven-cache
       mountPath: /root/.m2
+
   - name: docker
     image: docker:24-cli
     command: ['cat']
@@ -24,13 +26,16 @@ spec:
     volumeMounts:
     - name: docker-sock
       mountPath: /var/run/docker.sock
+
   - name: kubectl
     image: bitnami/kubectl:latest
     command: ['cat']
     tty: true
+
   volumes:
   - name: maven-cache
     emptyDir: {}
+
   - name: docker-sock
     hostPath:
       path: /var/run/docker.sock
@@ -44,9 +49,12 @@ spec:
   }
 
   stages {
+
     stage('Checkout') {
       steps {
-        checkout scm
+        container('maven') {
+          checkout scm
+        }
       }
     }
 
