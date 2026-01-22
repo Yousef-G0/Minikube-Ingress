@@ -99,7 +99,6 @@ spec:
       steps {
         container('maven') {
           sh '''
-            which kubectl
             kubectl version --client
             kubectl apply -f k8s/
             kubectl rollout status deployment/simple-java-app --timeout=5m
