@@ -5,29 +5,33 @@ pipeline {
       yaml """
 apiVersion: v1
 kind: Pod
+metadata:
+  labels:
+    jenkins: agent
 spec:
   serviceAccountName: jenkins-admin
 
   containers:
   - name: maven
     image: maven:3.8-openjdk-17
-    command: ["sleep"]
-    args: ["infinity"]
+    command: ['cat']
+    tty: true
+    volumeMounts:
+    - name: maven-cache
+      mountPath: /root/.m2
 
   - name: docker
     image: docker:24-cli
-    command: ["sleep"]
-    args: ["infinity"]
+    command: ['cat']
+    tty: true
     volumeMounts:
     - name: docker-sock
       mountPath: /var/run/docker.sock
 
-  - name: kubectl
-    image: lachlanevenson/k8s-kubectl:v1.29.0
-    command: ["sleep"]
-    args: ["infinity"]
-
   volumes:
+  - name: maven-cache
+    emptyDir: {}
+
   - name: docker-sock
     hostPath:
       path: /var/run/docker.sock
