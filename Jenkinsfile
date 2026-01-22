@@ -97,7 +97,7 @@ spec:
 
     stage('Deploy to Kubernetes') {
       steps {
-        container('kubectl') {
+        container('maven') {
           sh '''
             which kubectl
             kubectl version --client
