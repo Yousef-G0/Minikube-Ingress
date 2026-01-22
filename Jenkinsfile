@@ -11,15 +11,27 @@ spec:
   containers:
   - name: maven
     image: maven:3.8-openjdk-17
+    command:
+    - sleep
+    args:
+    - infinity
 
   - name: docker
     image: docker:24-cli
+    command:
+    - sleep
+    args:
+    - infinity
     volumeMounts:
     - name: docker-sock
       mountPath: /var/run/docker.sock
 
   - name: kubectl
     image: bitnami/kubectl:latest
+    command:
+    - sleep
+    args:
+    - infinity
 
   volumes:
   - name: docker-sock
@@ -69,7 +81,6 @@ spec:
           sh '''
             echo "${DOCKER_CREDENTIALS_PSW}" | docker login \
               -u "${DOCKER_CREDENTIALS_USR}" --password-stdin
-
             docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
             docker push ${DOCKER_IMAGE}:latest
           '''
