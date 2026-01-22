@@ -11,27 +11,21 @@ spec:
   containers:
   - name: maven
     image: maven:3.8-openjdk-17
-    command:
-    - sleep
-    args:
-    - infinity
+    command: ["sleep"]
+    args: ["infinity"]
 
   - name: docker
     image: docker:24-cli
-    command:
-    - sleep
-    args:
-    - infinity
+    command: ["sleep"]
+    args: ["infinity"]
     volumeMounts:
     - name: docker-sock
       mountPath: /var/run/docker.sock
 
   - name: kubectl
-    image: bitnami/kubectl:latest
-    command:
-    - sleep
-    args:
-    - infinity
+    image: lachlanevenson/k8s-kubectl:v1.29.0
+    command: ["sleep"]
+    args: ["infinity"]
 
   volumes:
   - name: docker-sock
@@ -92,6 +86,7 @@ spec:
       steps {
         container('kubectl') {
           sh '''
+            which kubectl
             kubectl version --client
             kubectl apply -f k8s/
             kubectl rollout status deployment/simple-java-app --timeout=5m
@@ -103,6 +98,7 @@ spec:
       }
     }
   }
+
 
   post {
     success {
