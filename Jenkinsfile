@@ -5,37 +5,23 @@ pipeline {
       yaml """
 apiVersion: v1
 kind: Pod
-metadata:
-  labels:
-    jenkins: agent
 spec:
   serviceAccountName: jenkins-admin
+
   containers:
   - name: maven
     image: maven:3.8-openjdk-17
-    command: ['cat']
-    tty: true
-    volumeMounts:
-    - name: maven-cache
-      mountPath: /root/.m2
 
   - name: docker
     image: docker:24-cli
-    command: ['cat']
-    tty: true
     volumeMounts:
     - name: docker-sock
       mountPath: /var/run/docker.sock
 
   - name: kubectl
     image: bitnami/kubectl:latest
-    command: ['cat']
-    tty: true
 
   volumes:
-  - name: maven-cache
-    emptyDir: {}
-
   - name: docker-sock
     hostPath:
       path: /var/run/docker.sock
@@ -52,20 +38,16 @@ spec:
 
     stage('Checkout') {
       steps {
-        container('maven') {
-          checkout scm
-        }
+        checkout scm
       }
     }
 
     stage('Build & Test') {
       steps {
-        container('maven') {
-          sh '''
-            mvn clean package -DskipTests
-            mvn test
-          '''
-        }
+        sh '''
+          mvn clean package -DskipTests
+          mvn test
+        '''
       }
     }
 
@@ -85,7 +67,9 @@ spec:
       steps {
         container('docker') {
           sh '''
-            echo ${DOCKER_CREDENTIALS_PSW} | docker login -u ${DOCKER_CREDENTIALS_USR} --password-stdin
+            echo "${DOCKER_CREDENTIALS_PSW}" | docker login \
+              -u "${DOCKER_CREDENTIALS_USR}" --password-stdin
+
             docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
             docker push ${DOCKER_IMAGE}:latest
           '''
@@ -96,12 +80,14 @@ spec:
     stage('Deploy to Kubernetes') {
       steps {
         container('kubectl') {
-          sh 'kubectl version --client'
-          sh 'kubectl apply -f k8s/'
-          sh 'kubectl rollout status deployment/simple-java-app --timeout=5m'
-          sh 'kubectl get pods -l app=simple-java-app'
-          sh 'kubectl get svc simple-java-app-service'
-          sh 'kubectl get ingress simple-java-app-ingress'
+          sh '''
+            kubectl version --client
+            kubectl apply -f k8s/
+            kubectl rollout status deployment/simple-java-app --timeout=5m
+            kubectl get pods -l app=simple-java-app
+            kubectl get svc simple-java-app-service
+            kubectl get ingress simple-java-app-ingress
+          '''
         }
       }
     }
@@ -109,10 +95,10 @@ spec:
 
   post {
     success {
-      echo 'Pipeline completed successfully!'
+      echo 'Pipeline completed successfully'
     }
     failure {
-      echo 'Pipeline failed!'
+      echo 'Pipeline failed'
     }
   }
 }
